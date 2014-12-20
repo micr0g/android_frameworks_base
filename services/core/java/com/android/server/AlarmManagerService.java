@@ -121,6 +121,7 @@ class AlarmManagerService extends SystemService {
 
     long mNativeData;
     private long mNextWakeup;
+    private long mNextRtcWakeup;
     private long mNextNonWakeup;
     int mBroadcastRefCount = 0;
     PowerManager.WakeLock mWakeLock;
@@ -626,7 +627,7 @@ class AlarmManagerService extends SystemService {
     @Override
     public void onStart() {
         mNativeData = init();
-        mNextWakeup = mNextNonWakeup = 0;
+        mNextWakeup = mNextRtcWakeup = mNextNonWakeup = 0;
 
         // We have to set current TimeZone info to kernel
         // because kernel doesn't keep this after reboot
@@ -1293,6 +1294,14 @@ class AlarmManagerService extends SystemService {
             if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
                 mNextWakeup = firstWakeup.start;
                 setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
+            }
+            if (firstRtcWakeup != null && mNextRtcWakeup != firstRtcWakeup.start) {
+                mNextRtcWakeup = firstRtcWakeup.start;
+                long when = firstRtcWakeup.getWhenByElapsedTime(mNextRtcWakeup);
+
+                if (when != 0) {
+                    setLocked(RTC_POWEROFF_WAKEUP, when);
+                }
             }
             if (firstBatch != firstWakeup) {
                 nextNonWakeup = firstBatch.start;
