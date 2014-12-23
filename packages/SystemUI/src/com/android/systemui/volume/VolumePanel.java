@@ -46,6 +46,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -99,6 +100,7 @@ public class VolumePanel extends Handler {
     private static final int TIMEOUT_DELAY_COLLAPSED = 4500;
     private static final int TIMEOUT_DELAY_SAFETY_WARNING = 5000;
     private static final int TIMEOUT_DELAY_EXPANDED = 10000;
+    private static final int ANIMATION_DURATION = 350; // ms
 
     private static final int MSG_VOLUME_CHANGED = 0;
     private static final int MSG_FREE_RESOURCES = 1;
@@ -1116,11 +1118,28 @@ public class VolumePanel extends Handler {
             mAudioManager.forceVolumeControlStream(stream);
             if (mDialog != null) {
                 mDialog.show();
+                Runnable r = new Runnable() {
+                    public void run() {
+                        mView.setY(-mView.getHeight());
+                        mView.animate().y(0).setDuration(ANIMATION_DURATION)
+                            .withEndAction(new Runnable() {
+                                public void run() {
+                                    if (mCallback != null) {
+                                        mCallback.onVisible(true);
+                                    }
+                                    announceDialogShown();
+                                }
+                        });
+                    }
+                };
+                if (mView.getHeight() == 0) {
+                    new Handler().post(r);
+                } else {
+                    r.run();
+                }
+            } else {
+                Log.d(mTag, "Bad, mDialog is null...");
             }
-            if (mCallback != null) {
-                mCallback.onVisible(true);
-            }
-            announceDialogShown();
         }
 
         // Do a little vibrate if applicable (only when going into vibrate mode)
@@ -1147,6 +1166,11 @@ public class VolumePanel extends Handler {
     }
 
     protected void onPlaySound(int streamType, int flags) {
+        // Just return if we disabled slider sound while adjusting volume
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                 Settings.System.VOLUME_ADJUST_SOUND_ENABLED, 1) == 0) {
+             return;
+        }
 
         if (hasMessages(MSG_STOP_SOUNDS)) {
             removeMessages(MSG_STOP_SOUNDS);
@@ -1363,12 +1387,18 @@ public class VolumePanel extends Handler {
             case MSG_TIMEOUT: {
                 if (isShowing()) {
                     if (mDialog != null) {
-                        mDialog.dismiss();
-                        clearRemoteStreamController();
-                        mActiveStreamType = -1;
-                        if (mCallback != null) {
-                            mCallback.onVisible(false);
-                        }
+                        mView.animate().y(-mView.getHeight())
+                                .setDuration(ANIMATION_DURATION)
+                                .withEndAction(new Runnable() {
+                            public void run() {
+                                mDialog.dismiss();
+                                clearRemoteStreamController();
+                                mActiveStreamType = -1;
+                                if (mCallback != null) {
+                                    mCallback.onVisible(false);
+                                }
+                            }
+                        });
                     }
                 }
                 synchronized (sSafetyWarningLock) {
