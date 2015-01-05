@@ -213,6 +213,9 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         if (mEcaView instanceof EmergencyCarrierArea) {
             ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
         }
+
+        mPasswordEntry.setQuickUnlockListener(null);
+        setButtonVisibility(getOkButton(), true);
     }
 
     @Override
@@ -405,6 +408,11 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
+    }
+
+    @Override
+    public void validateQuickUnlock(String entry) {
+        // disabled.
     }
 
     private void handleSubInfoChangeIfNeeded() {
