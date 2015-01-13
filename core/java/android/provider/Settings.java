@@ -2822,6 +2822,42 @@ public final class Settings {
         public static final String T9_SEARCH_INPUT_LOCALE = "t9_search_input_locale";
 
         /**
+         * Whether the user has enabled headsup (Default 1)
+         * HeadsUp is enabled by default within its Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
+         * setting. Avoid changing low level implementations and use a System setting to
+         * override per-user heads up on/off preference.
+         *
+         * Enable headsup = 1 (on by default)
+         * Disable headsup = 0
+         *
+         * @see com.android.systemui.statusbar.BaseStatusBar#addNotification
+         * @hide
+         */
+        public static final String HEADS_UP_USER_ENABLED =
+                "heads_up_user_enabled";
+
+        /** @hide */ public static final int HEADS_UP_USER_OFF = 0;
+        /** @hide */ public static final int HEADS_UP_USER_ON = 1;
+
+        /**
+         * Whether we want to filter in non-noisy ticker equipped notifications (Default 0)
+         * Applies to those that doesn't generate noise but are rich
+         * notifications.
+         *
+         * NOTE: This is an experimental setting, since it brokes some
+         *       notifications as for group ones. Will store this is
+         *       DevelopmentSettings, default is disabled.
+         *
+         * @see com.android.systemui.statusbar.phone.PhoneStatusBar#mHeadsUpTicker
+         * @hide
+         */
+        public static final String HEADS_UP_TICKER_ENABLED =
+                "heads_up_ticker_enabled";
+
+        /** @hide */ public static final int HEADS_UP_TICKER_OFF = 0;
+        /** @hide */ public static final int HEADS_UP_TICKER_ON = 1;
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -2911,6 +2947,14 @@ public final class Settings {
          * @hide
          */
         public static final String WHEN_TO_MAKE_WIFI_CALLS = "when_to_make_wifi_calls";
+
+        /**
+         * Settings to reset on user choice. They will fall back to their default value (0).
+         *
+         * @hide
+         */
+        public static final String[] SETTINGS_TO_RESET = {
+        };
 
         // Settings moved to Settings.Secure
 
@@ -5022,7 +5066,7 @@ public final class Settings {
          * Whether to include options in power menu for rebooting into recovery and bootloader
          * @hide
          */
-          public static final String ADVANCED_REBOOT = "advanced_reboot";
+        public static final String ADVANCED_REBOOT = "advanced_reboot";
 
         /**
          * This are the settings to be backed up.
