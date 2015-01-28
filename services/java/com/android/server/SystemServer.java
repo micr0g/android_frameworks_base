@@ -533,8 +533,6 @@ public final class SystemServer {
 
         ThemeService themeService = null;
 
-        ThemeService themeService = null;
-
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             //if (!disableNonCoreServices) { // TODO: View depends on these; mock them?
